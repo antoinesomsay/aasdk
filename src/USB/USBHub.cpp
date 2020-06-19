@@ -21,6 +21,7 @@
 #include <f1x/aasdk/USB/USBHub.hpp>
 #include <f1x/aasdk/USB/AccessoryModeQueryChain.hpp>
 #include <f1x/aasdk/Error/Error.hpp>
+#include <f1x/aasdk/Common/Log.hpp>
 
 namespace f1x
 {
@@ -88,6 +89,7 @@ int USBHub::hotplugEventsHandler(libusb_context* usbContext, libusb_device* devi
 
 bool USBHub::isAOAPDevice(const libusb_device_descriptor& deviceDescriptor) const
 {
+    AASDK_LOG(info) << "[USBHub] AOAP Device?";
     return deviceDescriptor.idVendor == cGoogleVendorId &&
             (deviceDescriptor.idProduct == cAOAPId || deviceDescriptor.idProduct == cAOAPWithAdbId);
 }

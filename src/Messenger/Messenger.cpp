@@ -19,6 +19,7 @@
 #include <boost/endian/conversion.hpp>
 #include <f1x/aasdk/Error/Error.hpp>
 #include <f1x/aasdk/Messenger/Messenger.hpp>
+#include <f1x/aasdk/Common/Log.hpp>
 
 namespace f1x
 {
@@ -38,6 +39,7 @@ Messenger::Messenger(boost::asio::io_service& ioService, IMessageInStream::Point
 
 void Messenger::enqueueReceive(ChannelId channelId, ReceivePromise::Pointer promise)
 {
+    AASDK_LOG(info) << "[Messenger] enqueueReceive";
     receiveStrand_.dispatch([this, self = this->shared_from_this(), channelId, promise = std::move(promise)]() mutable {
         if(!channelReceiveMessageQueue_.empty(channelId))
         {
@@ -60,6 +62,13 @@ void Messenger::enqueueReceive(ChannelId channelId, ReceivePromise::Pointer prom
 
 void Messenger::enqueueSend(Message::Pointer message, SendPromise::Pointer promise)
 {
+
+	AASDK_LOG(info) << "[Messenger] enqueueSend";
+	messenger::MessageId messageId(message->getPayload());
+	common::DataConstBuffer payload(message->getPayload(), messageId.getSizeOf());
+	AASDK_LOG(info) << "[Messenger][enqueueSend] data:" << *(payload.cdata);
+	AASDK_LOG(info) << "[Messenger][enqueueSend] size:" << payload.size;
+
     sendStrand_.dispatch([this, self = this->shared_from_this(), message = std::move(message), promise = std::move(promise)]() mutable {
         channelSendPromiseQueue_.emplace_back(std::make_pair(std::move(message), std::move(promise)));
 

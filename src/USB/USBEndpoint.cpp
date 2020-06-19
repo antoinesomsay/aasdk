@@ -19,6 +19,7 @@
 #include <f1x/aasdk/USB/USBEndpoint.hpp>
 #include <f1x/aasdk/USB/IUSBWrapper.hpp>
 #include <f1x/aasdk/Error/Error.hpp>
+#include <f1x/aasdk/Common/Log.hpp>
 
 namespace f1x
 {
@@ -92,6 +93,9 @@ void USBEndpoint::bulkTransfer(common::DataBuffer buffer, uint32_t timeout, Prom
         }
         else
         {
+		AASDK_LOG(info) << "[USBEndpoint] BulkTransfer";
+		AASDK_LOG(trace) << "[USBEndpoint] buffer.data= " << *(buffer.data);
+		AASDK_LOG(trace) << "[USBEndpoint] buffer.size= " << buffer.size;
             usbWrapper_.fillBulkTransfer(transfer, handle_, endpointAddress_, buffer.data, buffer.size, reinterpret_cast<libusb_transfer_cb_fn>(&USBEndpoint::transferHandler), this, timeout);
             this->transfer(transfer, std::move(promise));
         }
@@ -100,6 +104,7 @@ void USBEndpoint::bulkTransfer(common::DataBuffer buffer, uint32_t timeout, Prom
 
 void USBEndpoint::transfer(libusb_transfer *transfer, Promise::Pointer promise)
 {
+    AASDK_LOG(info) << "[USBEndpoint] transfer";
     strand_.dispatch([this, self = this->shared_from_this(), transfer, promise = std::move(promise)]() mutable {
         auto submitResult = usbWrapper_.submitTransfer(transfer);
 
@@ -143,6 +148,7 @@ DeviceHandle USBEndpoint::getDeviceHandle() const
 
 void USBEndpoint::transferHandler(libusb_transfer *transfer)
 {
+    AASDK_LOG(info) << "[USBEndpoint] transferHandler";
     auto self = reinterpret_cast<USBEndpoint*>(transfer->user_data)->shared_from_this();
 
     self->strand_.dispatch([self, transfer]() mutable {

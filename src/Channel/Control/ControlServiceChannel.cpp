@@ -41,6 +41,7 @@ ControlServiceChannel::ControlServiceChannel(boost::asio::io_service::strand& st
 
 void ControlServiceChannel::sendVersionRequest(SendPromise::Pointer promise)
 {
+    AASDK_LOG(info) << "[ControlServiceChannel] sendVersionRequest";
     auto message(std::make_shared<messenger::Message>(channelId_, messenger::EncryptionType::PLAIN, messenger::MessageType::SPECIFIC));
     message->insertPayload(messenger::MessageId(proto::ids::ControlMessage::VERSION_REQUEST).getData());
 
@@ -54,6 +55,7 @@ void ControlServiceChannel::sendVersionRequest(SendPromise::Pointer promise)
 
 void ControlServiceChannel::sendHandshake(common::Data handshakeBuffer, SendPromise::Pointer promise)
 {
+    AASDK_LOG(info) << "[ControlServiceChannel] sendHandshake";
     auto message(std::make_shared<messenger::Message>(channelId_, messenger::EncryptionType::PLAIN, messenger::MessageType::SPECIFIC));
     message->insertPayload(messenger::MessageId(proto::ids::ControlMessage::SSL_HANDSHAKE).getData());
     message->insertPayload(handshakeBuffer);
@@ -63,6 +65,7 @@ void ControlServiceChannel::sendHandshake(common::Data handshakeBuffer, SendProm
 
 void ControlServiceChannel::sendAuthComplete(const proto::messages::AuthCompleteIndication& response, SendPromise::Pointer promise)
 {
+    AASDK_LOG(info) << "[ControlServiceChannel] sendAuthComplete";
     auto message(std::make_shared<messenger::Message>(channelId_, messenger::EncryptionType::PLAIN, messenger::MessageType::SPECIFIC));
     message->insertPayload(messenger::MessageId(proto::ids::ControlMessage::AUTH_COMPLETE).getData());
     message->insertPayload(response);
@@ -72,6 +75,7 @@ void ControlServiceChannel::sendAuthComplete(const proto::messages::AuthComplete
 
 void ControlServiceChannel::sendServiceDiscoveryResponse(const proto::messages::ServiceDiscoveryResponse& response, SendPromise::Pointer promise)
 {
+    AASDK_LOG(info) << "[ControlServiceChannel] sendServiceDiscoveryResponse";
     auto message(std::make_shared<messenger::Message>(channelId_, messenger::EncryptionType::ENCRYPTED, messenger::MessageType::SPECIFIC));
     message->insertPayload(messenger::MessageId(proto::ids::ControlMessage::SERVICE_DISCOVERY_RESPONSE).getData());
     message->insertPayload(response);
@@ -81,6 +85,7 @@ void ControlServiceChannel::sendServiceDiscoveryResponse(const proto::messages::
 
 void ControlServiceChannel::sendAudioFocusResponse(const proto::messages::AudioFocusResponse& response, SendPromise::Pointer promise)
 {
+    AASDK_LOG(info) << "[ControlServiceChannel] sendAudioFocusResponse";
     auto message(std::make_shared<messenger::Message>(channelId_, messenger::EncryptionType::ENCRYPTED, messenger::MessageType::SPECIFIC));
     message->insertPayload(messenger::MessageId(proto::ids::ControlMessage::AUDIO_FOCUS_RESPONSE).getData());
     message->insertPayload(response);
@@ -90,6 +95,7 @@ void ControlServiceChannel::sendAudioFocusResponse(const proto::messages::AudioF
 
 void ControlServiceChannel::sendShutdownRequest(const proto::messages::ShutdownRequest& request, SendPromise::Pointer promise)
 {
+    AASDK_LOG(info) << "[ControlServiceChannel] sendShutdownRequest";
     auto message(std::make_shared<messenger::Message>(channelId_, messenger::EncryptionType::ENCRYPTED, messenger::MessageType::SPECIFIC));
     message->insertPayload(messenger::MessageId(proto::ids::ControlMessage::SHUTDOWN_REQUEST).getData());
     message->insertPayload(request);
@@ -99,6 +105,7 @@ void ControlServiceChannel::sendShutdownRequest(const proto::messages::ShutdownR
 
 void ControlServiceChannel::sendShutdownResponse(const proto::messages::ShutdownResponse& response, SendPromise::Pointer promise)
 {
+    AASDK_LOG(info) << "[ControlServiceChannel] sendShutdownResponse";
     auto message(std::make_shared<messenger::Message>(channelId_, messenger::EncryptionType::ENCRYPTED, messenger::MessageType::SPECIFIC));
     message->insertPayload(messenger::MessageId(proto::ids::ControlMessage::SHUTDOWN_RESPONSE).getData());
     message->insertPayload(response);
@@ -108,6 +115,7 @@ void ControlServiceChannel::sendShutdownResponse(const proto::messages::Shutdown
 
 void ControlServiceChannel::sendNavigationFocusResponse(const proto::messages::NavigationFocusResponse& response, SendPromise::Pointer promise)
 {
+    AASDK_LOG(info) << "[ControlServiceChannel] sendNavigationFocusResponse";
     auto message(std::make_shared<messenger::Message>(channelId_, messenger::EncryptionType::ENCRYPTED, messenger::MessageType::SPECIFIC));
     message->insertPayload(messenger::MessageId(proto::ids::ControlMessage::NAVIGATION_FOCUS_RESPONSE).getData());
     message->insertPayload(response);
@@ -117,6 +125,7 @@ void ControlServiceChannel::sendNavigationFocusResponse(const proto::messages::N
 
 void ControlServiceChannel::sendPingRequest(const proto::messages::PingRequest& request, SendPromise::Pointer promise)
 {
+    AASDK_LOG(info) << "[ControlServiceChannel] sendPingRequest";
     auto message(std::make_shared<messenger::Message>(channelId_, messenger::EncryptionType::PLAIN, messenger::MessageType::SPECIFIC));
     message->insertPayload(messenger::MessageId(proto::ids::ControlMessage::PING_REQUEST).getData());
     message->insertPayload(request);
@@ -126,6 +135,7 @@ void ControlServiceChannel::sendPingRequest(const proto::messages::PingRequest& 
 
 void ControlServiceChannel::receive(IControlServiceChannelEventHandler::Pointer eventHandler)
 {
+    AASDK_LOG(info) << "[ControlServiceChannel] receive";
     auto receivePromise  = messenger::ReceivePromise::defer(strand_);
     receivePromise->then(std::bind(&ControlServiceChannel::messageHandler, this->shared_from_this(), std::placeholders::_1, eventHandler),
                         std::bind(&IControlServiceChannelEventHandler::onChannelError, eventHandler, std::placeholders::_1));
@@ -135,8 +145,12 @@ void ControlServiceChannel::receive(IControlServiceChannelEventHandler::Pointer 
 
 void ControlServiceChannel::messageHandler(messenger::Message::Pointer message, IControlServiceChannelEventHandler::Pointer eventHandler)
 {
+    AASDK_LOG(info) << "[ControlServiceChannel] messageHandler";
     messenger::MessageId messageId(message->getPayload());
     common::DataConstBuffer payload(message->getPayload(), messageId.getSizeOf());
+
+    AASDK_LOG(trace) << "[ControlServiceChannel] payload.data= " << *(payload.cdata);
+    AASDK_LOG(trace) << "[ControlServiceChannel] payload.size= " << payload.size;
 
     switch(messageId.getId())
     {
@@ -173,6 +187,7 @@ void ControlServiceChannel::messageHandler(messenger::Message::Pointer message, 
 
 void ControlServiceChannel::handleVersionResponse(const common::DataConstBuffer& payload, IControlServiceChannelEventHandler::Pointer eventHandler)
 {
+    AASDK_LOG(info) << "[ControlServiceChannel] handleVersionResponse";
     const size_t elements = payload.size / sizeof(uint16_t);
     const uint16_t* versionResponse = reinterpret_cast<const uint16_t*>(payload.cdata);
 
@@ -185,6 +200,7 @@ void ControlServiceChannel::handleVersionResponse(const common::DataConstBuffer&
 
 void ControlServiceChannel::handleServiceDiscoveryRequest(const common::DataConstBuffer& payload, IControlServiceChannelEventHandler::Pointer eventHandler)
 {
+    AASDK_LOG(info) << "[ControlServiceChannel] handleServiceDiscoveryRequest";
     proto::messages::ServiceDiscoveryRequest request;
     if(request.ParseFromArray(payload.cdata, payload.size))
     {
@@ -198,6 +214,7 @@ void ControlServiceChannel::handleServiceDiscoveryRequest(const common::DataCons
 
 void ControlServiceChannel::handleAudioFocusRequest(const common::DataConstBuffer& payload, IControlServiceChannelEventHandler::Pointer eventHandler)
 {
+    AASDK_LOG(info) << "[ControlServiceChannel] handleAudioFocusRequest";
     proto::messages::AudioFocusRequest request;
     if(request.ParseFromArray(payload.cdata, payload.size))
     {
@@ -211,6 +228,7 @@ void ControlServiceChannel::handleAudioFocusRequest(const common::DataConstBuffe
 
 void ControlServiceChannel::handleShutdownRequest(const common::DataConstBuffer& payload, IControlServiceChannelEventHandler::Pointer eventHandler)
 {
+    AASDK_LOG(info) << "[ControlServiceChannel] handleShutdownRequest";
     proto::messages::ShutdownRequest request;
     if(request.ParseFromArray(payload.cdata, payload.size))
     {
@@ -224,6 +242,7 @@ void ControlServiceChannel::handleShutdownRequest(const common::DataConstBuffer&
 
 void ControlServiceChannel::handleShutdownResponse(const common::DataConstBuffer& payload, IControlServiceChannelEventHandler::Pointer eventHandler)
 {
+    AASDK_LOG(info) << "[ControlServiceChannel] handleShutdownResponse";
     proto::messages::ShutdownResponse response;
     if(response.ParseFromArray(payload.cdata, payload.size))
     {
@@ -237,6 +256,7 @@ void ControlServiceChannel::handleShutdownResponse(const common::DataConstBuffer
 
 void ControlServiceChannel::handleNavigationFocusRequest(const common::DataConstBuffer& payload, IControlServiceChannelEventHandler::Pointer eventHandler)
 {
+    AASDK_LOG(info) << "[ControlServiceChannel] handleNavigationFocusRequest";
     proto::messages::NavigationFocusRequest request;
     if(request.ParseFromArray(payload.cdata, payload.size))
     {
@@ -250,6 +270,7 @@ void ControlServiceChannel::handleNavigationFocusRequest(const common::DataConst
 
 void ControlServiceChannel::handlePingResponse(const common::DataConstBuffer& payload, IControlServiceChannelEventHandler::Pointer eventHandler)
 {
+    AASDK_LOG(info) << "[ControlServiceChannel] handlePingResponse";
     proto::messages::PingResponse response;
     if(response.ParseFromArray(payload.cdata, payload.size))
     {

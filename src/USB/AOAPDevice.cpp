@@ -20,6 +20,7 @@
 #include <f1x/aasdk/USB/USBEndpoint.hpp>
 #include <f1x/aasdk/USB/AOAPDevice.hpp>
 #include <f1x/aasdk/Error/Error.hpp>
+#include <f1x/aasdk/Common/Log.hpp>
 
 namespace f1x
 {
@@ -64,6 +65,7 @@ IUSBEndpoint& AOAPDevice::getOutEndpoint()
 
 IAOAPDevice::Pointer AOAPDevice::create(IUSBWrapper& usbWrapper, boost::asio::io_service& ioService, DeviceHandle handle)
 {
+    AASDK_LOG(info) << "[AOAPDevice] create";
     auto configDescriptorHandle = AOAPDevice::getConfigDescriptor(usbWrapper, handle);
     auto interface = AOAPDevice::getInterface(configDescriptorHandle);
     auto interfaceDescriptor = AOAPDevice::getInterfaceDescriptor(interface);

@@ -17,6 +17,7 @@
 */
 
 #include <f1x/aasdk/USB/USBWrapper.hpp>
+#include <f1x/aasdk/Common/Log.hpp>
 
 namespace f1x
 {
@@ -66,6 +67,8 @@ void USBWrapper::fillBulkTransfer(libusb_transfer *transfer,
     unsigned char *buffer, int length, libusb_transfer_cb_fn callback,
     void *user_data, unsigned int timeout)
 {
+    //AASDK_LOG(info) <<  "[USBWrapper] fillBulkTransfer"; 
+    //AASDK_LOG(trace) << "[USBWrapper] buffer= " << buffer;
     libusb_fill_bulk_transfer(transfer, dev_handle.get(), endpoint, buffer, length, callback, user_data, timeout);
 }
 

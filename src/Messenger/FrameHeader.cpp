@@ -18,6 +18,7 @@
 
 #include <boost/endian/conversion.hpp>
 #include <f1x/aasdk/Messenger/FrameHeader.hpp>
+#include <f1x/aasdk/Common/Log.hpp>
 
 namespace f1x
 {
@@ -28,10 +29,15 @@ namespace messenger
 
 FrameHeader::FrameHeader(const common::DataConstBuffer& buffer)
 {
+    AASDK_LOG(info) << "[FrameHeader] FrameHeader buffer.cdata:" << *(buffer.cdata);
     channelId_ = static_cast<ChannelId>(buffer.cdata[0]);
     frameType_ = static_cast<FrameType>(buffer.cdata[1] & static_cast<uint32_t>(FrameType::BULK));
     encryptionType_ = static_cast<EncryptionType>(buffer.cdata[1] & static_cast<uint8_t>(EncryptionType::ENCRYPTED));
     messageType_ = static_cast<MessageType>(buffer.cdata[1] & static_cast<uint8_t>(MessageType::CONTROL));
+	AASDK_LOG(trace) << "[FrameHeader] channelId_= " << static_cast<std::underlying_type<ChannelId>::type>(channelId_) ;
+	AASDK_LOG(trace) << "[FrameHeader] frameType_= " << static_cast<std::underlying_type<FrameType>::type>(frameType_);
+	AASDK_LOG(trace) << "[FrameHeader] encryptionType_= " << static_cast<std::underlying_type<EncryptionType>::type>(encryptionType_);
+	AASDK_LOG(trace) << "[FrameHeader] messageType_= " << static_cast<std::underlying_type<MessageType>::type>(messageType_);
 }
 
 FrameHeader::FrameHeader(ChannelId channelId, FrameType frameType, EncryptionType encryptionType, MessageType messageType)

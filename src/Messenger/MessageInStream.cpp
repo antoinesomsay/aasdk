@@ -18,6 +18,7 @@
 
 #include <f1x/aasdk/Messenger/MessageInStream.hpp>
 #include <f1x/aasdk/Error/Error.hpp>
+#include <f1x/aasdk/Common/Log.hpp>
 
 namespace f1x
 {
@@ -36,6 +37,7 @@ MessageInStream::MessageInStream(boost::asio::io_service& ioService, transport::
 
 void MessageInStream::startReceive(ReceivePromise::Pointer promise)
 {
+	AASDK_LOG(info) << "[MessageInStream] startReceive";
     strand_.dispatch([this, self = this->shared_from_this(), promise = std::move(promise)]() mutable {
         if(promise_ == nullptr)
         {
@@ -114,6 +116,9 @@ void MessageInStream::receiveFramePayloadHandler(const common::DataConstBuffer& 
 {   
     if(message_->getEncryptionType() == EncryptionType::ENCRYPTED)
     {
+	AASDK_LOG(info) << "[MessageInStream] Message received encrypted";
+	AASDK_LOG(trace) << "[MessageInStream] cdata= " << buffer.cdata;
+	AASDK_LOG(trace) << "[MessageInStream] size= " << buffer.size;
         try
         {
             cryptor_->decrypt(message_->getPayload(), buffer);
