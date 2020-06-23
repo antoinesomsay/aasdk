@@ -66,7 +66,7 @@ void Messenger::enqueueSend(Message::Pointer message, SendPromise::Pointer promi
 	AASDK_LOG(info) << "[Messenger] enqueueSend";
 	messenger::MessageId messageId(message->getPayload());
 	common::DataConstBuffer payload(message->getPayload(), messageId.getSizeOf());
-	AASDK_LOG(info) << "[Messenger][enqueueSend] data:" << *(payload.cdata);
+	AASDK_LOG(info) << "[Messenger][enqueueSend] data:" << payload.cdata[0] << payload.cdata[1] << payload.cdata[2] << payload.cdata[3];
 	AASDK_LOG(info) << "[Messenger][enqueueSend] size:" << payload.size;
 
     sendStrand_.dispatch([this, self = this->shared_from_this(), message = std::move(message), promise = std::move(promise)]() mutable {
