@@ -64,6 +64,10 @@ void MessageInStream::startReceive(ReceivePromise::Pointer promise)
 
 void MessageInStream::receiveFrameHeaderHandler(const common::DataConstBuffer& buffer)
 {
+
+	AASDK_LOG(info) << "[MessageInStream] receiveFrameHeaderHandler";
+	AASDK_LOG(trace) << "[MessageInStream] cdata= "<<buffer.cdata[0]<<buffer.cdata[1];
+	AASDK_LOG(trace) << "[MessageInStream] buffer.size = " << buffer.size;
     FrameHeader frameHeader(buffer);
 
     if(message_ == nullptr)
@@ -81,6 +85,8 @@ void MessageInStream::receiveFrameHeaderHandler(const common::DataConstBuffer& b
     recentFrameType_ = frameHeader.getType();
     const size_t frameSize = FrameSize::getSizeOf(frameHeader.getType() == FrameType::FIRST ? FrameSizeType::EXTENDED : FrameSizeType::SHORT);
 
+	AASDK_LOG(trace) << "[MessageInStream] frameSize = " << frameSize;
+
     auto transportPromise = transport::ITransport::ReceivePromise::defer(strand_);
     transportPromise->then(
         [this, self = this->shared_from_this()](common::Data data) mutable {
@@ -97,6 +103,7 @@ void MessageInStream::receiveFrameHeaderHandler(const common::DataConstBuffer& b
 
 void MessageInStream::receiveFrameSizeHandler(const common::DataConstBuffer& buffer)
 {
+	AASDK_LOG(info) << "[MessageInStream] receiveFrameSizeHandler";
     auto transportPromise = transport::ITransport::ReceivePromise::defer(strand_);
     transportPromise->then(
         [this, self = this->shared_from_this()](common::Data data) mutable {
@@ -114,10 +121,11 @@ void MessageInStream::receiveFrameSizeHandler(const common::DataConstBuffer& buf
 
 void MessageInStream::receiveFramePayloadHandler(const common::DataConstBuffer& buffer)
 {   
+	AASDK_LOG(info) << "[MessageInStream] receiveFramePayloadHandler";
     if(message_->getEncryptionType() == EncryptionType::ENCRYPTED)
     {
-	AASDK_LOG(info) << "[MessageInStream] Message received encrypted";
-	AASDK_LOG(trace) << "[MessageInStream] cdata= " << buffer.cdata;
+	AASDK_LOG(info) << "[MessageInStream] ENCRYPTED";
+	AASDK_LOG(trace) << "[MessageInStream] cdata= "<<buffer.cdata[0]<<buffer.cdata[1]<<buffer.cdata[2]<<buffer.cdata[3]<<buffer.cdata[4]<<buffer.cdata[5]<<buffer.cdata[6]<<buffer.cdata[7];
 	AASDK_LOG(trace) << "[MessageInStream] size= " << buffer.size;
         try
         {
@@ -133,6 +141,9 @@ void MessageInStream::receiveFramePayloadHandler(const common::DataConstBuffer& 
     }
     else
     {
+	AASDK_LOG(info) << "[MessageInStream] NOT ENCRYPTED";
+	AASDK_LOG(trace) << "[MessageInStream] cdata= "<<buffer.cdata[0]<<buffer.cdata[1]<<buffer.cdata[2]<<buffer.cdata[3]<<buffer.cdata[4]<<buffer.cdata[5]<<buffer.cdata[6]<<buffer.cdata[7];
+	AASDK_LOG(trace) << "[MessageInStream] size= " << buffer.size;
         message_->insertPayload(buffer);
     }
 
