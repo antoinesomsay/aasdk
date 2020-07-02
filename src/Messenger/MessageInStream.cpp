@@ -64,9 +64,10 @@ void MessageInStream::startReceive(ReceivePromise::Pointer promise)
 
 void MessageInStream::receiveFrameHeaderHandler(const common::DataConstBuffer& buffer)
 {
-
+	std::stringstream ss;
 	AASDK_LOG(info) << "[MessageInStream] receiveFrameHeaderHandler";
-	AASDK_LOG(trace) << "[MessageInStream] cdata= "<<buffer.cdata[0]<<buffer.cdata[1];
+	FILL_CHEX(ss, buffer, buffer.size);
+	AASDK_LOG(trace) << "[MessageInStream] cdata= " << ss.str();
 	AASDK_LOG(trace) << "[MessageInStream] buffer.size = " << buffer.size;
     FrameHeader frameHeader(buffer);
 
@@ -121,16 +122,25 @@ void MessageInStream::receiveFrameSizeHandler(const common::DataConstBuffer& buf
 
 void MessageInStream::receiveFramePayloadHandler(const common::DataConstBuffer& buffer)
 {   
+	std::stringstream ss;
+	FILL_CHEX(ss, buffer, buffer.size);
 	AASDK_LOG(info) << "[MessageInStream] receiveFramePayloadHandler";
     if(message_->getEncryptionType() == EncryptionType::ENCRYPTED)
     {
 	AASDK_LOG(info) << "[MessageInStream] ENCRYPTED";
-	AASDK_LOG(trace) << "[MessageInStream] cdata= "<<buffer.cdata[0]<<buffer.cdata[1]<<buffer.cdata[2]<<buffer.cdata[3]<<buffer.cdata[4]<<buffer.cdata[5]<<buffer.cdata[6]<<buffer.cdata[7];
+	AASDK_LOG(trace) << "[MessageInStream] cdata= "<< ss.str();
 	AASDK_LOG(trace) << "[MessageInStream] size= " << buffer.size;
         try
         {
             cryptor_->decrypt(message_->getPayload(), buffer);
-        }
+/*		messenger::MessageId myId(message_->getPayload());
+		common::DataBuffer myp(message_->getPayload(), myId.getSizeOf());
+		ss.str(std::string());
+		FILL_HEX(ss, myp, myp.size);
+		AASDK_LOG(info) << "[MessageInStream] AFTER DECRYPTED";
+		AASDK_LOG(trace) << "[MessageInStream] cdata=" << ss.str();
+		AASDK_LOG(trace) << "[MessageInStream] size= " << myp.size;
+*/        }
         catch(const error::Error& e)
         {
             message_.reset();
@@ -142,7 +152,7 @@ void MessageInStream::receiveFramePayloadHandler(const common::DataConstBuffer& 
     else
     {
 	AASDK_LOG(info) << "[MessageInStream] NOT ENCRYPTED";
-	AASDK_LOG(trace) << "[MessageInStream] cdata= "<<buffer.cdata[0]<<buffer.cdata[1]<<buffer.cdata[2]<<buffer.cdata[3]<<buffer.cdata[4]<<buffer.cdata[5]<<buffer.cdata[6]<<buffer.cdata[7];
+	AASDK_LOG(trace) << "[MessageInStream] cdata= "<< ss.str();
 	AASDK_LOG(trace) << "[MessageInStream] size= " << buffer.size;
         message_->insertPayload(buffer);
     }

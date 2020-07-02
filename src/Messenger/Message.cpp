@@ -17,6 +17,7 @@
 */
 
 #include <f1x/aasdk/Messenger/Message.hpp>
+#include <f1x/aasdk/Common/Log.hpp>
 
 namespace f1x
 {
@@ -78,11 +79,19 @@ const common::Data& Message::getPayload() const
 
 void Message::insertPayload(const common::Data& payload)
 {
-    payload_.insert(payload_.end(), payload.begin(), payload.end());
+	AASDK_LOG(info) << "[Message] insertPayload (from Data)";
+	std::stringstream ss;
+	int taille = 0;
+	for (auto it = payload.begin(); it != payload.end(); it++) taille++;
+	for (auto it = payload.begin(); it != payload.end(); it++) ss << ' ' << TO_UINT(*it);
+	AASDK_LOG(trace) << "[Message] payload.data =" << ss.str();
+	AASDK_LOG(trace) << "[Message] payload size= " << taille;
+	payload_.insert(payload_.end(), payload.begin(), payload.end());
 }
 
 void Message::insertPayload(const google::protobuf::Message& message)
 {
+	AASDK_LOG(info) << "[Message] insertPayload (from protobuf)";
     auto offset = payload_.size();
     payload_.resize(payload_.size() + message.ByteSize());
 
@@ -92,11 +101,21 @@ void Message::insertPayload(const google::protobuf::Message& message)
 
 void Message::insertPayload(const common::DataConstBuffer& buffer)
 {
+	AASDK_LOG(info) << "[Message] insertPayload (copy cbuffer)";
+	std::stringstream ss;
+	FILL_CHEX(ss, buffer, buffer.size);
+	AASDK_LOG(trace) << "[Message] buffer.cdata =" << ss.str();
+	AASDK_LOG(trace) << "[Message] buffer.size = " << buffer.size;
     common::copy(payload_, buffer);
 }
 
 void Message::insertPayload(common::DataBuffer& buffer)
 {
+	AASDK_LOG(info) << "[Message] insertPayload (copy buffer)";
+    	std::stringstream ss;
+	FILL_HEX(ss, buffer, buffer.size);
+	AASDK_LOG(trace) << "[Message] buffer.data =" << ss.str();
+	AASDK_LOG(trace) << "[Message] buffer.size = " << buffer.size;
     common::copy(payload_, buffer);
 }
 

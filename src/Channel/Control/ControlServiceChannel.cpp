@@ -149,7 +149,10 @@ void ControlServiceChannel::messageHandler(messenger::Message::Pointer message, 
     messenger::MessageId messageId(message->getPayload());
     common::DataConstBuffer payload(message->getPayload(), messageId.getSizeOf());
 
-    AASDK_LOG(trace) << "[ControlServiceChannel] payload.data= " << (payload.cdata)[0] << (payload.cdata)[1] << (payload.cdata)[2] << (payload.cdata)[3];
+	std::stringstream ss;
+	FILL_CHEX(ss, payload, payload.size);
+
+    AASDK_LOG(trace) << "[ControlServiceChannel] payload.data= " << ss.str();
     AASDK_LOG(trace) << "[ControlServiceChannel] payload.size= " << payload.size;
 
     switch(messageId.getId())

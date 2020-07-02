@@ -21,3 +21,17 @@
 #include <boost/log/trivial.hpp>
 
 #define AASDK_LOG(severity) BOOST_LOG_TRIVIAL(severity) << "[AaSdk] "
+
+#define TO_UINT(i) static_cast<unsigned int>(static_cast<unsigned char>(i))
+
+#define FILL_HEX(stm, p, s) if (s > 30) for(int id=0;id<30;id++)  \
+				stm << " " << TO_UINT(p.data[id]); \
+			    else for(int id=0;id<s;id++) \
+				stm << " " << TO_UINT(p.data[id])
+
+
+#define FILL_CHEX(stm, p, s) if (s > 30) for(int id=0;id<30;id++)  \
+				stm << " " << TO_UINT(p.cdata[id]);\
+			    else for(int id=0;id<s;id++)\
+				stm << " " << TO_UINT(p.cdata[id])
+

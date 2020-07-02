@@ -35,7 +35,7 @@ FrameHeader::FrameHeader(const common::DataConstBuffer& buffer)
     encryptionType_ = static_cast<EncryptionType>(buffer.cdata[1] & static_cast<uint8_t>(EncryptionType::ENCRYPTED));
     messageType_ = static_cast<MessageType>(buffer.cdata[1] & static_cast<uint8_t>(MessageType::CONTROL));
 	AASDK_LOG(trace) << "[FrameHeader] channelId_= " << static_cast<std::underlying_type<ChannelId>::type>(channelId_) ;
-	AASDK_LOG(trace) << "[FrameHeader] buffer.cdata[1] = " << (buffer.cdata)[1];
+	AASDK_LOG(trace) << "[FrameHeader] buffer.cdata[1] = " << TO_UINT(buffer.cdata[1]);
 	AASDK_LOG(trace) << "[FrameHeader] frameType_= " << static_cast<std::underlying_type<FrameType>::type>(frameType_);
 	AASDK_LOG(trace) << "[FrameHeader] encryptionType_= " << static_cast<std::underlying_type<EncryptionType>::type>(encryptionType_);
 	AASDK_LOG(trace) << "[FrameHeader] messageType_= " << static_cast<std::underlying_type<MessageType>::type>(messageType_);
