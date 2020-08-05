@@ -93,12 +93,14 @@ void USBEndpoint::bulkTransfer(common::DataBuffer buffer, uint32_t timeout, Prom
         }
         else
         {
+		if (buffer.size < 10000) {
 		AASDK_LOG(info) << "[USBEndpoint] BulkTransfer";
 		std::stringstream ss;
 		FILL_HEX(ss, buffer, buffer.size);
 		AASDK_LOG(trace) << "[USBEndpoint] buffer.data= " << ss.str();
 		AASDK_LOG(trace) << "[USBEndpoint] buffer.size= " << buffer.size;
-            usbWrapper_.fillBulkTransfer(transfer, handle_, endpointAddress_, buffer.data, buffer.size, reinterpret_cast<libusb_transfer_cb_fn>(&USBEndpoint::transferHandler), this, timeout);
+		} 
+           usbWrapper_.fillBulkTransfer(transfer, handle_, endpointAddress_, buffer.data, buffer.size, reinterpret_cast<libusb_transfer_cb_fn>(&USBEndpoint::transferHandler), this, timeout);
             this->transfer(transfer, std::move(promise));
         }
     }

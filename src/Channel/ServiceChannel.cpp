@@ -18,6 +18,7 @@
 
 #include <f1x/aasdk/IO/PromiseLink.hpp>
 #include <f1x/aasdk/Channel/ServiceChannel.hpp>
+#include <f1x/aasdk/Common/Log.hpp>
 
 namespace f1x
 {
@@ -38,6 +39,15 @@ ServiceChannel::ServiceChannel(boost::asio::io_service::strand& strand,
 
 void ServiceChannel::send(messenger::Message::Pointer message, SendPromise::Pointer promise)
 {
+	AASDK_LOG(info) << "[ServiceChannel] send";
+	messenger::MessageId messageId(message->getPayload());
+	common::DataConstBuffer payload(message->getPayload(), messageId.getSizeOf());
+	std::stringstream ss;
+	FILL_CHEX(ss, payload, payload.size);
+
+	AASDK_LOG(trace) << "[ServiceChannel] payload.data= " << ss.str();
+	AASDK_LOG(trace) << "[ServiceChannel] payload.size= " << payload.size;
+
     auto sendPromise = messenger::SendPromise::defer(strand_.get_io_service());
     io::PromiseLink<>::forward(*sendPromise, std::move(promise));
     messenger_->enqueueSend(std::move(message), std::move(sendPromise));

@@ -82,8 +82,9 @@ void Message::insertPayload(const common::Data& payload)
 	AASDK_LOG(info) << "[Message] insertPayload (from Data)";
 	std::stringstream ss;
 	int taille = 0;
+	int id = 0;
 	for (auto it = payload.begin(); it != payload.end(); it++) taille++;
-	for (auto it = payload.begin(); it != payload.end(); it++) ss << ' ' << TO_UINT(*it);
+	for (auto it = payload.begin(); id < taille && id < 30; it++) {ss << ' ' << std::hex << TO_UINT(*it); id ++;}
 	AASDK_LOG(trace) << "[Message] payload.data =" << ss.str();
 	AASDK_LOG(trace) << "[Message] payload size= " << taille;
 	payload_.insert(payload_.end(), payload.begin(), payload.end());

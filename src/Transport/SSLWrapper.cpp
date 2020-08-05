@@ -22,6 +22,8 @@
 #include <openssl/ssl.h>
 #include <openssl/conf.h>
 #include <f1x/aasdk/Transport/SSLWrapper.hpp>
+#include <f1x/aasdk/Common/Log.hpp>
+#include <boost/stacktrace.hpp>
 
 namespace f1x
 {
@@ -125,10 +127,19 @@ void SSLWrapper::setConnectState(SSL* ssl)
 
 int SSLWrapper::doHandshake(SSL* ssl)
 {
+//	AASDK_LOG(info) << boost::stacktrace::stacktrace();
     auto result = SSL_do_handshake(ssl);
     auto errorCode = SSL_get_error(ssl, result);
 
     return errorCode;
+}
+
+int SSLWrapper::myHandshake(BIO* b, SSL* ssl)
+{
+	auto result = BIO_do_handshake(b);
+	auto errorCode = SSL_get_error(ssl, result);
+
+	return errorCode;
 }
 
 void SSLWrapper::free(SSL* ssl)

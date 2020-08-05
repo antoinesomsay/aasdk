@@ -205,6 +205,10 @@ void ControlServiceChannel::handleServiceDiscoveryRequest(const common::DataCons
 {
     AASDK_LOG(info) << "[ControlServiceChannel] handleServiceDiscoveryRequest";
     proto::messages::ServiceDiscoveryRequest request;
+	std::stringstream ss;
+	FILL_CHEX(ss, payload, payload.size);
+	AASDK_LOG(info) << "[ControlServiceChannel] payload.cdata=" << ss.str();
+	AASDK_LOG(info) << "[ControlServiceChannel] payload.size = " << payload.size;
     if(request.ParseFromArray(payload.cdata, payload.size))
     {
         eventHandler->onServiceDiscoveryRequest(request);

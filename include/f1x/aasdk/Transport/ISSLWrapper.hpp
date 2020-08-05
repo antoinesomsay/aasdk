@@ -49,6 +49,7 @@ public:
     virtual void setBIOs(SSL* ssl, const BIOs& bIOs, size_t maxBufferSize) = 0;
     virtual void setConnectState(SSL* ssl) = 0;
     virtual int doHandshake(SSL* ssl) = 0;
+	virtual int myHandshake(BIO* b, SSL* ssl) = 0;
     virtual void free(SSL* ssl) = 0;
     virtual void free(SSL_CTX* context) = 0;
     virtual void free(BIO* bio) = 0;

@@ -157,6 +157,26 @@ bool Cryptor::doHandshake()
     }
 }
 
+bool Cryptor::myHandshake()
+{
+    std::lock_guard<decltype(mutex_)> lock(mutex_);
+
+    auto result = sslWrapper_->myHandshake(bIOs_.first, ssl_);
+    if(result == SSL_ERROR_WANT_READ)
+    {
+        return false;
+    }
+    else if(result == SSL_ERROR_NONE)
+    {
+        isActive_ = true;
+        return true;
+    }
+    else
+    {
+        throw error::Error(error::ErrorCode::SSL_HANDSHAKE, result);
+    }
+}
+
 size_t Cryptor::encrypt(common::Data& output, const common::DataConstBuffer& buffer)
 {
     std::lock_guard<decltype(mutex_)> lock(mutex_);

@@ -45,6 +45,7 @@ public:
     void setBIOs(SSL* ssl, const BIOs& bIOs, size_t maxBufferSize) override;
     void setConnectState(SSL* ssl) override;
     int doHandshake(SSL* ssl) override;
+    int myHandshake(BIO* b, SSL* ssl) override;
     int getError(SSL* ssl, int returnCode) override;
 
     void free(SSL* ssl) override;
