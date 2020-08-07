@@ -131,12 +131,6 @@ void SSLWrapper::setAcceptState(SSL* ssl)
     SSL_set_verify(ssl, SSL_VERIFY_NONE, nullptr);
 }
 
-void SSLWrapper::setConnectState(SSL* ssl)
-{
-    SSL_set_connect_state(ssl);
-    SSL_set_verify(ssl, SSL_VERIFY_NONE, nullptr);
-}
-
 int SSLWrapper::doHandshake(SSL* ssl)
 {
 //	AASDK_LOG(info) << boost::stacktrace::stacktrace();

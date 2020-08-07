@@ -106,7 +106,7 @@ void Cryptor::init()
     sslWrapper_->setConnectState(ssl_);
 }
 
-void Cryptor::init()
+void Cryptor::myinit()
 {
     std::lock_guard<decltype(mutex_)> lock(mutex_);
 

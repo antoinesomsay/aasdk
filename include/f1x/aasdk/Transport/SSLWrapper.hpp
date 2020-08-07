@@ -46,7 +46,6 @@ public:
     void setConnectState(SSL* ssl) override;
     void setAcceptState(SSL* ssl) override;
     int doHandshake(SSL* ssl) override;
-    int myHandshake(BIO* b, SSL* ssl) override;
     int getError(SSL* ssl, int returnCode) override;
 
     void free(SSL* ssl) override;
