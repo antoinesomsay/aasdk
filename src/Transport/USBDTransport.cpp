@@ -16,7 +16,7 @@
 *  along with aasdk. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <f1x/aasdk/Transport/Transport.hpp>
+#include <f1x/aasdk/Transport/USBDTransport.hpp>
 
 namespace f1x
 {
@@ -25,83 +25,47 @@ namespace aasdk
 namespace transport
 {
 
-Transport::Transport(boost::asio::io_service& ioService)
+USBDTransport::USBDTransport(boost::asio::io_service& ioService)
     : receiveStrand_(ioService)
     , sendStrand_(ioService)
 {}
 
 void Transport::receive(size_t size, ReceivePromise::Pointer promise)
 {
+    int ret; 
+
     receiveStrand_.dispatch([this, self = this->shared_from_this(), size, promise = std::move(promise)]() mutable {
-        receiveQueue_.emplace_back(std::make_pair(size, std::move(promise)));
+        
+        auto usbEndpointPromise = usb::IUSBEndpoint::Promise::defer(receiveStrand_);
+        usbEndpointPromise->then([this, self = this->shared_from_this()](auto bytesTransferred) {
+            this->receiveHandler(bytesTransferred);
+        });
 
-        if(receiveQueue_.size() == 1)
-        {
-            try
-            {
-                this->distributeReceivedData();
-            }
-            catch(const error::Error& e)
-            {
-                this->rejectReceivePromises(e);
-            }
-        }
+        uint8_t* readMsg;
+        ret = read(_fd_usb_out, readMsg, size); // promise?
+
     });
-}
-
-void Transport::receiveHandler(size_t bytesTransferred)
-{
-    try
-    {
-        receivedDataSink_.commit(bytesTransferred);
-        this->distributeReceivedData();
-    }
-    catch(const error::Error& e)
-    {
-        this->rejectReceivePromises(e);
-    }
-}
-
-void Transport::distributeReceivedData()
-{
-    for(auto queueElement = receiveQueue_.begin(); queueElement != receiveQueue_.end();)
-    {
-        if(receivedDataSink_.getAvailableSize() < queueElement->first)
-        {
-            auto buffer = receivedDataSink_.fill();
-            this->enqueueReceive(std::move(buffer));
-
-            break;
-        }
-        else
-        {
-            auto data(receivedDataSink_.consume(queueElement->first));
-            queueElement->second->resolve(std::move(data));
-            queueElement = receiveQueue_.erase(queueElement);
-        }
-    }
-}
-
-void Transport::rejectReceivePromises(const error::Error& e)
-{
-    for(auto& queueElement : receiveQueue_)
-    {
-        queueElement.second->reject(e);
-    }
-
-    receiveQueue_.clear();
 }
 
 void Transport::send(common::Data data, SendPromise::Pointer promise)
 {
-    sendStrand_.dispatch([this, self = this->shared_from_this(), data = std::move(data), promise = std::move(promise)]() mutable {
-        sendQueue_.emplace_back(std::make_pair(std::move(data), std::move(promise)));
+    int ret;
 
-        if(sendQueue_.size() == 1)
-        {
-            this->enqueueSend(sendQueue_.begin());
-        }
+    sendStrand_.dispatch([this, self = this->shared_from_this(), data = std::move(data), promise = std::move(promise)]() mutable {
+
+        uint8_t* writeMsg;
+        writeMsg = &data[0];
+        ret = write(_fd_usb_in, writeMsg, MAX_BUFF_SIZE*sizeof(uint8_t)); // promise?
+
     });
+
+
+
+}
+
+void USBTransport::stop()
+{
+
 }
 
 }

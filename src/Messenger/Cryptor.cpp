@@ -106,6 +106,72 @@ void Cryptor::init()
     sslWrapper_->setConnectState(ssl_);
 }
 
+void Cryptor::init()
+{
+    std::lock_guard<decltype(mutex_)> lock(mutex_);
+
+    certificate_ = sslWrapper_->readCertificate(cCertificate);
+
+    if(certificate_ == nullptr)
+    {
+        throw error::Error(error::ErrorCode::SSL_READ_CERTIFICATE);
+    }
+
+    privateKey_ = sslWrapper_->readPrivateKey(cPrivateKey);
+
+    if(privateKey_ == nullptr)
+    {
+        throw error::Error(error::ErrorCode::SSL_READ_PRIVATE_KEY);
+    }
+
+    auto method = sslWrapper_->getMethod();
+
+    if(method == nullptr)
+    {
+        throw error::Error(error::ErrorCode::SSL_METHOD);
+    }
+
+    context_ = sslWrapper_->createContext(method);
+
+    if(context_ == nullptr)
+    {
+        throw error::Error(error::ErrorCode::SSL_CONTEXT_CREATION);
+    }
+
+    if(!sslWrapper_->useCertificate(context_, certificate_))
+    {
+        throw error::Error(error::ErrorCode::SSL_USE_CERTIFICATE);
+    }
+
+    if(!sslWrapper_->usePrivateKey(context_, privateKey_))
+    {
+        throw error::Error(error::ErrorCode::SSL_USE_PRIVATE_KEY);
+    }
+
+    ssl_ = sslWrapper_->createInstance(context_);
+
+    if(ssl_ == nullptr)
+    {
+        throw error::Error(error::ErrorCode::SSL_HANDLER_CREATION);
+    }
+
+    bIOs_ = sslWrapper_->createBIOs();
+
+    if(bIOs_.first == nullptr)
+    {
+        throw error::Error(error::ErrorCode::SSL_READ_BIO_CREATION);
+    }
+
+    if(bIOs_.second == nullptr)
+    {
+        throw error::Error(error::ErrorCode::SSL_WRITE_BIO_CREATION);
+    }
+
+    sslWrapper_->setBIOs(ssl_, bIOs_, maxBufferSize_);
+
+    sslWrapper_->setAcceptState(ssl_);
+}
+
 void Cryptor::deinit()
 {
     std::lock_guard<decltype(mutex_)> lock(mutex_);
@@ -142,26 +208,6 @@ bool Cryptor::doHandshake()
     std::lock_guard<decltype(mutex_)> lock(mutex_);
 
     auto result = sslWrapper_->doHandshake(ssl_);
-    if(result == SSL_ERROR_WANT_READ)
-    {
-        return false;
-    }
-    else if(result == SSL_ERROR_NONE)
-    {
-        isActive_ = true;
-        return true;
-    }
-    else
-    {
-        throw error::Error(error::ErrorCode::SSL_HANDSHAKE, result);
-    }
-}
-
-bool Cryptor::myHandshake()
-{
-    std::lock_guard<decltype(mutex_)> lock(mutex_);
-
-    auto result = sslWrapper_->myHandshake(bIOs_.first, ssl_);
     if(result == SSL_ERROR_WANT_READ)
     {
         return false;

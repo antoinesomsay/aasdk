@@ -35,9 +35,9 @@ public:
     Cryptor(transport::ISSLWrapper::Pointer sslWrapper);
 
     void init() override;
+    void myinit() override;
     void deinit() override;
     bool doHandshake() override;
-    bool myHandshake() override;
     size_t encrypt(common::Data& output, const common::DataConstBuffer& buffer) override;
     size_t decrypt(common::Data& output, const common::DataConstBuffer& buffer) override;
 

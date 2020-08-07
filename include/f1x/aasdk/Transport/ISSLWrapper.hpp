@@ -48,6 +48,7 @@ public:
     virtual std::pair<BIO*, BIO*> createBIOs() = 0;
     virtual void setBIOs(SSL* ssl, const BIOs& bIOs, size_t maxBufferSize) = 0;
     virtual void setConnectState(SSL* ssl) = 0;
+    virtual void setAcceptState(SSL* ssl) = 0;
     virtual int doHandshake(SSL* ssl) = 0;
 	virtual int myHandshake(BIO* b, SSL* ssl) = 0;
     virtual void free(SSL* ssl) = 0;

@@ -23,6 +23,12 @@
 #include <boost/asio.hpp>
 #include <f1x/aasdk/Transport/ITransport.hpp>
 #include <f1x/aasdk/Transport/DataSink.hpp>
+#define MAX_BUFF_SIZE 1024
+extern "C" {
+#include <unistd.h>
+};
+
+
 
 namespace f1x
 {
@@ -39,25 +45,11 @@ public:
     void receive(size_t size, ReceivePromise::Pointer promise) override;
     void send(common::Data data, SendPromise::Pointer promise) override;
 
-protected:
-    typedef std::list<std::pair<size_t, ReceivePromise::Pointer>> ReceiveQueue;
-    typedef std::list<std::pair<common::Data, SendPromise::Pointer>> SendQueue;
-
-    using std::enable_shared_from_this<Transport>::shared_from_this;
-    void receiveHandler(size_t bytesTransferred);
-    void distributeReceivedData();
-    void rejectReceivePromises(const error::Error& e);
-
-    virtual void enqueueReceive(common::DataBuffer buffer) = 0;
-    virtual void enqueueSend(SendQueue::iterator queueElement) = 0;
-
-    DataSink receivedDataSink_;
-
+private:
     boost::asio::io_service::strand receiveStrand_;
-    ReceiveQueue receiveQueue_;
-
     boost::asio::io_service::strand sendStrand_;
-    SendQueue sendQueue_;
+    int _fd_usb_out;
+    int _fd_usb_in;
 };
 
 }
