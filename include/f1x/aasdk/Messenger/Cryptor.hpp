@@ -35,7 +35,6 @@ public:
     Cryptor(transport::ISSLWrapper::Pointer sslWrapper);
 
     void init() override;
-    void myinit() override;
     void deinit() override;
     bool doHandshake() override;
     size_t encrypt(common::Data& output, const common::DataConstBuffer& buffer) override;
@@ -57,10 +56,12 @@ private:
     SSL* ssl_;
     transport::ISSLWrapper::BIOs bIOs_;
     bool isActive_;
+    int serv_;
 
     const static std::string cCertificate;
     const static std::string cPrivateKey;
     mutable std::mutex mutex_;
+
 };
 
 }

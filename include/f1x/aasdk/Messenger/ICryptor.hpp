@@ -37,7 +37,6 @@ public:
     virtual ~ICryptor() = default;
 
     virtual void init() = 0;
-    virtual void myinit() = 0;
     virtual void deinit() = 0;
     virtual bool doHandshake() = 0;
     virtual size_t encrypt(common::Data& output, const common::DataConstBuffer& buffer) = 0;

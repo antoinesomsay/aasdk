@@ -28,7 +28,7 @@ namespace aasdk
 namespace messenger
 {
 
-Cryptor::Cryptor(transport::ISSLWrapper::Pointer sslWrapper)
+Cryptor::Cryptor(transport::ISSLWrapper::Pointer sslWrapper, int serv)
     : sslWrapper_(std::move(sslWrapper))
     , maxBufferSize_(1024 * 20)
     , certificate_(nullptr)
@@ -36,6 +36,7 @@ Cryptor::Cryptor(transport::ISSLWrapper::Pointer sslWrapper)
     , context_(nullptr)
     , ssl_(nullptr)
     , isActive_(false)
+    , serv_(serv)
 {
 
 }
@@ -103,73 +104,10 @@ void Cryptor::init()
 
     sslWrapper_->setBIOs(ssl_, bIOs_, maxBufferSize_);
 
-    sslWrapper_->setConnectState(ssl_);
-}
-
-void Cryptor::myinit()
-{
-    std::lock_guard<decltype(mutex_)> lock(mutex_);
-
-    certificate_ = sslWrapper_->readCertificate(cCertificate);
-
-    if(certificate_ == nullptr)
-    {
-        throw error::Error(error::ErrorCode::SSL_READ_CERTIFICATE);
-    }
-
-    privateKey_ = sslWrapper_->readPrivateKey(cPrivateKey);
-
-    if(privateKey_ == nullptr)
-    {
-        throw error::Error(error::ErrorCode::SSL_READ_PRIVATE_KEY);
-    }
-
-    auto method = sslWrapper_->getMethod();
-
-    if(method == nullptr)
-    {
-        throw error::Error(error::ErrorCode::SSL_METHOD);
-    }
-
-    context_ = sslWrapper_->createContext(method);
-
-    if(context_ == nullptr)
-    {
-        throw error::Error(error::ErrorCode::SSL_CONTEXT_CREATION);
-    }
-
-    if(!sslWrapper_->useCertificate(context_, certificate_))
-    {
-        throw error::Error(error::ErrorCode::SSL_USE_CERTIFICATE);
-    }
-
-    if(!sslWrapper_->usePrivateKey(context_, privateKey_))
-    {
-        throw error::Error(error::ErrorCode::SSL_USE_PRIVATE_KEY);
-    }
-
-    ssl_ = sslWrapper_->createInstance(context_);
-
-    if(ssl_ == nullptr)
-    {
-        throw error::Error(error::ErrorCode::SSL_HANDLER_CREATION);
-    }
-
-    bIOs_ = sslWrapper_->createBIOs();
-
-    if(bIOs_.first == nullptr)
-    {
-        throw error::Error(error::ErrorCode::SSL_READ_BIO_CREATION);
-    }
-
-    if(bIOs_.second == nullptr)
-    {
-        throw error::Error(error::ErrorCode::SSL_WRITE_BIO_CREATION);
-    }
-
-    sslWrapper_->setBIOs(ssl_, bIOs_, maxBufferSize_);
-
-    sslWrapper_->setAcceptState(ssl_);
+    if (serv_)
+        sslWrapper_->setAcceptState(ssl_);
+    else
+        sslWrapper_->setConnectState(ssl_);
 }
 
 void Cryptor::deinit()
@@ -207,7 +145,13 @@ bool Cryptor::doHandshake()
 {
     std::lock_guard<decltype(mutex_)> lock(mutex_);
 
-    auto result = sslWrapper_->doHandshake(ssl_);
+    int result;
+
+    if (serv_)
+        if (!SSL_is_init_finished(ssl_)) 
+            result = sslWrapper_->doHandshake(ssl_);
+    else
+        result = sslWrapper_->doHandshake(ssl_);
     if(result == SSL_ERROR_WANT_READ)
     {
         return false;
