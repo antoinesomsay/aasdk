@@ -32,7 +32,7 @@ namespace messenger
 class Cryptor: public ICryptor
 {
 public:
-    Cryptor(transport::ISSLWrapper::Pointer sslWrapper);
+    Cryptor(transport::ISSLWrapper::Pointer sslWrapper, int serv);
 
     void init() override;
     void deinit() override;
