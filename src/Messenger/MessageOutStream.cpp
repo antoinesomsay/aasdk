@@ -19,6 +19,7 @@
 #include <boost/endian/conversion.hpp>
 #include <f1x/aasdk/IO/PromiseLink.hpp>
 #include <f1x/aasdk/Messenger/MessageOutStream.hpp>
+#include <f1x/aasdk/Common/Log.hpp>
 
 namespace f1x
 {
@@ -125,15 +126,17 @@ common::Data MessageOutStream::compoundFrame(FrameType frameType, const common::
     data.resize(data.size() + FrameSize::getSizeOf(frameType == FrameType::FIRST ? FrameSizeType::EXTENDED : FrameSizeType::SHORT));
     size_t payloadSize = 0;
 
-    if(message_->getEncryptionType() == EncryptionType::ENCRYPTED)
+/*    if(message_->getEncryptionType() == EncryptionType::ENCRYPTED)
     {
+	AASDK_LOG(info) << "[MessageOutStream] ENCRYPTED";
         payloadSize = cryptor_->encrypt(data, payloadBuffer);
     }
     else
     {
-        data.insert(data.end(), payloadBuffer.cdata, payloadBuffer.cdata + payloadBuffer.size);
+	AASDK_LOG(info) << "[MessageOutStream] NOT ENCRYPTED";
+*/        data.insert(data.end(), payloadBuffer.cdata, payloadBuffer.cdata + payloadBuffer.size);
         payloadSize = payloadBuffer.size;
-    }
+//    }
 
     this->setFrameSize(data, frameType, payloadSize, message_->getPayload().size());
     return data;

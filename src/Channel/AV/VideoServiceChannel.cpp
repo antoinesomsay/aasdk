@@ -40,6 +40,7 @@ VideoServiceChannel::VideoServiceChannel(boost::asio::io_service::strand& strand
 
 void VideoServiceChannel::receive(IVideoServiceChannelEventHandler::Pointer eventHandler)
 {
+    AASDK_LOG(info) << "[VideoServiceChannel] receive";
     auto receivePromise = messenger::ReceivePromise::defer(strand_);
     receivePromise->then(std::bind(&VideoServiceChannel::messageHandler, this->shared_from_this(), std::placeholders::_1, eventHandler),
                         std::bind(&IVideoServiceChannelEventHandler::onChannelError, eventHandler, std::placeholders::_1));
@@ -49,11 +50,13 @@ void VideoServiceChannel::receive(IVideoServiceChannelEventHandler::Pointer even
 
 messenger::ChannelId VideoServiceChannel::getId() const
 {
+    AASDK_LOG(info) << "[VideoServiceChannel] getId";
     return channelId_;
 }
 
 void VideoServiceChannel::sendChannelOpenResponse(const proto::messages::ChannelOpenResponse& response, SendPromise::Pointer promise)
 {
+    AASDK_LOG(info) << "[VideoServiceChannel] sendChannelOpenResponse";
     auto message(std::make_shared<messenger::Message>(channelId_, messenger::EncryptionType::ENCRYPTED, messenger::MessageType::CONTROL));
     message->insertPayload(messenger::MessageId(proto::ids::ControlMessage::CHANNEL_OPEN_RESPONSE).getData());
     message->insertPayload(response);
@@ -63,6 +66,7 @@ void VideoServiceChannel::sendChannelOpenResponse(const proto::messages::Channel
 
 void VideoServiceChannel::sendAVChannelSetupResponse(const proto::messages::AVChannelSetupResponse& response, SendPromise::Pointer promise)
 {
+    AASDK_LOG(info) << "[VideoServiceChannel] sendAVChannelSetupResponse";
     auto message(std::make_shared<messenger::Message>(channelId_, messenger::EncryptionType::ENCRYPTED, messenger::MessageType::SPECIFIC));
     message->insertPayload(messenger::MessageId(proto::ids::AVChannelMessage::SETUP_RESPONSE).getData());
     message->insertPayload(response);
@@ -72,6 +76,7 @@ void VideoServiceChannel::sendAVChannelSetupResponse(const proto::messages::AVCh
 
 void VideoServiceChannel::sendVideoFocusIndication(const proto::messages::VideoFocusIndication& indication, SendPromise::Pointer promise)
 {
+    AASDK_LOG(info) << "[VideoServiceChannel] sendVideoFocusIndication";
     auto message(std::make_shared<messenger::Message>(channelId_, messenger::EncryptionType::ENCRYPTED, messenger::MessageType::SPECIFIC));
     message->insertPayload(messenger::MessageId(proto::ids::AVChannelMessage::VIDEO_FOCUS_INDICATION).getData());
     message->insertPayload(indication);
@@ -81,6 +86,7 @@ void VideoServiceChannel::sendVideoFocusIndication(const proto::messages::VideoF
 
 void VideoServiceChannel::sendAVMediaAckIndication(const proto::messages::AVMediaAckIndication& indication, SendPromise::Pointer promise)
 {
+    AASDK_LOG(info) << "[VideoServiceChannel] sendAVMediaAckIndication";
     auto message(std::make_shared<messenger::Message>(channelId_, messenger::EncryptionType::ENCRYPTED, messenger::MessageType::SPECIFIC));
     message->insertPayload(messenger::MessageId(proto::ids::AVChannelMessage::AV_MEDIA_ACK_INDICATION).getData());
     message->insertPayload(indication);
@@ -90,8 +96,15 @@ void VideoServiceChannel::sendAVMediaAckIndication(const proto::messages::AVMedi
 
 void VideoServiceChannel::messageHandler(messenger::Message::Pointer message, IVideoServiceChannelEventHandler::Pointer eventHandler)
 {
+    AASDK_LOG(info) << "[VideoServiceChannel] messageHandler";
     messenger::MessageId messageId(message->getPayload());
     common::DataConstBuffer payload(message->getPayload(), messageId.getSizeOf());
+
+    std::stringstream ss;
+    FILL_CHEX(ss, payload, payload.size);
+
+    AASDK_LOG(trace) << "[VideoServiceChannel] payload.data= " << ss.str();
+    AASDK_LOG(trace) << "[VideoServiceChannel] payload.size= " << payload.size;
 
     switch(messageId.getId())
     {
@@ -122,6 +135,7 @@ void VideoServiceChannel::messageHandler(messenger::Message::Pointer message, IV
 
 void VideoServiceChannel::handleAVChannelSetupRequest(const common::DataConstBuffer& payload, IVideoServiceChannelEventHandler::Pointer eventHandler)
 {
+    AASDK_LOG(info) << "[VideoServiceChannel] handleAVChannelSetupRequest";
     proto::messages::AVChannelSetupRequest request;
     if(request.ParseFromArray(payload.cdata, payload.size))
     {
@@ -135,6 +149,7 @@ void VideoServiceChannel::handleAVChannelSetupRequest(const common::DataConstBuf
 
 void VideoServiceChannel::handleStartIndication(const common::DataConstBuffer& payload, IVideoServiceChannelEventHandler::Pointer eventHandler)
 {
+    AASDK_LOG(info) << "[VideoServiceChannel] handleStartIndication";
     proto::messages::AVChannelStartIndication indication;
     if(indication.ParseFromArray(payload.cdata, payload.size))
     {
@@ -148,6 +163,7 @@ void VideoServiceChannel::handleStartIndication(const common::DataConstBuffer& p
 
 void VideoServiceChannel::handleChannelOpenRequest(const common::DataConstBuffer& payload, IVideoServiceChannelEventHandler::Pointer eventHandler)
 {
+    AASDK_LOG(info) << "[VideoServiceChannel] handleChannelOpenRequest";
     proto::messages::ChannelOpenRequest request;
     if(request.ParseFromArray(payload.cdata, payload.size))
     {
@@ -161,6 +177,7 @@ void VideoServiceChannel::handleChannelOpenRequest(const common::DataConstBuffer
 
 void VideoServiceChannel::handleVideoFocusRequest(const common::DataConstBuffer& payload, IVideoServiceChannelEventHandler::Pointer eventHandler)
 {
+    AASDK_LOG(info) << "[VideoServiceChannel] handleVideoFocusRequest";
     proto::messages::VideoFocusRequest request;
     if(request.ParseFromArray(payload.cdata, payload.size))
     {
@@ -174,6 +191,7 @@ void VideoServiceChannel::handleVideoFocusRequest(const common::DataConstBuffer&
 
 void VideoServiceChannel::handleAVMediaWithTimestampIndication(const common::DataConstBuffer& payload, IVideoServiceChannelEventHandler::Pointer eventHandler)
 {
+    AASDK_LOG(info) << "[VideoServiceChannel] handleAVMediaWithTimestampIndication";
     if(payload.size >= sizeof(messenger::Timestamp::ValueType))
     {
         messenger::Timestamp timestamp(payload);

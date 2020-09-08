@@ -211,10 +211,16 @@ void ControlServiceChannel::handleServiceDiscoveryRequest(const common::DataCons
 	AASDK_LOG(info) << "[ControlServiceChannel] payload.size = " << payload.size;
     if(request.ParseFromArray(payload.cdata, payload.size))
     {
+	AASDK_LOG(info) << "[ControlServiceChannel] success parse";
+    AASDK_LOG(info) << "[ControlServiceChannel] dev_name:" << request.device_name();
+    AASDK_LOG(info) << "[ControlServiceChannel] dev_name:" << request.device_brand();
         eventHandler->onServiceDiscoveryRequest(request);
     }
     else
     {
+	AASDK_LOG(info) << "[ControlServiceChannel] fail parse";
+    AASDK_LOG(info) << "[ControlServiceChannel] dev_name: " << request.device_name();
+    AASDK_LOG(info) << "[ControlServiceChannel] dev_brand: " << request.device_brand();
         eventHandler->onChannelError(error::Error(error::ErrorCode::PARSE_PAYLOAD));
     }
 }

@@ -125,7 +125,7 @@ void MessageInStream::receiveFramePayloadHandler(const common::DataConstBuffer& 
 	std::stringstream ss;
 	FILL_CHEX(ss, buffer, buffer.size);
 	AASDK_LOG(info) << "[MessageInStream] receiveFramePayloadHandler";
-    if(message_->getEncryptionType() == EncryptionType::ENCRYPTED)
+/*    if(message_->getEncryptionType() == EncryptionType::ENCRYPTED)
     {
 	AASDK_LOG(info) << "[MessageInStream] ENCRYPTED";
 	AASDK_LOG(trace) << "[MessageInStream] cdata= "<< ss.str();
@@ -133,14 +133,7 @@ void MessageInStream::receiveFramePayloadHandler(const common::DataConstBuffer& 
         try
         {
             cryptor_->decrypt(message_->getPayload(), buffer);
-/*		messenger::MessageId myId(message_->getPayload());
-		common::DataBuffer myp(message_->getPayload(), myId.getSizeOf());
-		ss.str(std::string());
-		FILL_HEX(ss, myp, myp.size);
-		AASDK_LOG(info) << "[MessageInStream] AFTER DECRYPTED";
-		AASDK_LOG(trace) << "[MessageInStream] cdata=" << ss.str();
-		AASDK_LOG(trace) << "[MessageInStream] size= " << myp.size;
-*/        }
+        }
         catch(const error::Error& e)
         {
             message_.reset();
@@ -154,8 +147,8 @@ void MessageInStream::receiveFramePayloadHandler(const common::DataConstBuffer& 
 	AASDK_LOG(info) << "[MessageInStream] NOT ENCRYPTED";
 	AASDK_LOG(trace) << "[MessageInStream] cdata= "<< ss.str();
 	AASDK_LOG(trace) << "[MessageInStream] size= " << buffer.size;
-        message_->insertPayload(buffer);
-    }
+*/        message_->insertPayload(buffer);
+   // }
 
     if(recentFrameType_ == FrameType::BULK || recentFrameType_ == FrameType::LAST)
     {

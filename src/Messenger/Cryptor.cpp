@@ -20,6 +20,7 @@
 #include <functional>
 #include <f1x/aasdk/Messenger/Cryptor.hpp>
 #include <f1x/aasdk/Error/Error.hpp>
+#include <f1x/aasdk/Common/Log.hpp>
 
 namespace f1x
 {
@@ -147,10 +148,14 @@ bool Cryptor::doHandshake()
 
     int result;
 
-    if (serv_)
-        if (!SSL_is_init_finished(ssl_)) 
+    if (serv_) {
+        AASDK_LOG(info) << "TLS Server handshake";
+        if (!SSL_is_init_finished(ssl_)) {
             result = sslWrapper_->doHandshake(ssl_);
+        }
+    }
     else
+        AASDK_LOG(info) << "SSL Server handshake";
         result = sslWrapper_->doHandshake(ssl_);
     if(result == SSL_ERROR_WANT_READ)
     {
